@@ -1,0 +1,77 @@
+<html>
+	<head>
+		<style>
+			body{
+				margin: 0;
+				width:100%;
+				height:100%;
+			}
+			#Canvas{
+				width: 100%;
+				height: 100%;
+				background: steelblue;
+			}
+			#Birdy{
+				width: 100px;
+				height: 100px;
+				background: red;
+				
+				position:absolute;
+				top: 50%;
+				left: 20%;
+			}
+		</style>
+		
+	</head>
+	<body>
+		<div id="Canvas">
+			<div id="Birdy">
+			</div>
+		</div>
+		
+	
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script>
+			
+		
+		
+			$(function(){
+				$('#Canvas').mousedown(function(){
+					Birdy.jump();
+					console.log('Jumping!');
+				});
+				setInterval(function(){Birdy.fall();}, 50);
+				var Birdy = new (function(){
+					var selectorObject = $('#Birdy');
+					
+					var jumping = false;
+					
+					var gravVeloc = 0;
+					
+					var gravAccel = 0.01;
+					
+					this.fall = function(){
+						if(!jumping){ //Check if we're jumping
+							//If we're currently not jumping
+							selectorObject.stop().animate({top:'+='+gravVeloc+'%'}, 50, 'linear'); //Stop any current animations and then drop the bird by Velocity%
+							gravVeloc += graveAccel; //Add the acceleration scalar to the velocity scalar.
+						}else{
+							gravVeloc = 0; //Reset the falling velocity.
+							console.log('Grav Disabled');
+						}
+					};
+					
+					this.jump = function(){
+						jumping = true; //Set that we're jumping right now
+						selectorObject.stop().animate({top:'-=9%'}, 500, 'linear', function(){ //stop any current animations and "Jump" up 9% in 500ms linearly.
+							jumping = false; //Set our jumping flag to false right after our jump
+							Birdy.fall(); //Run the fall immediately 
+						});
+					};
+				});
+			});
+			
+		</script>
+		
+	</body>
+</html>
