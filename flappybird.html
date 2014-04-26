@@ -5,8 +5,10 @@
 				margin: 0;
 				width:100%;
 				height:100%;
+                overflow: hidden;
 			}
 			#Canvas{
+                position:relative;
 				width: 100%;
 				height: 100%;
 				background: steelblue;
@@ -21,8 +23,25 @@
 				left: 20%;
 			}
             .Pipe{
+                position:absolute;
+                top: 0;
+                left: 100%;
+                
                 width: 150px;
+                
                 background: greenyellow;
+                
+                animation: PipeMovement 15s linear;
+                -webkit-animation: PipeMovement 15s linear;
+            }
+            
+            @keyframes PipeMovement{
+                from {left: 100%}
+                to {left: -25%}
+            }
+            @-webkit-keyframes PipeMovement{
+                from {left: 100%}
+                to {left: -25%}
             }
 		</style>
 		
@@ -36,18 +55,26 @@
 	
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 		<script>
-			
-		
-		
 			$(function(){
                 
                 var canvasObject = $('#Canvas');
-                
+                                
 				canvasObject.mousedown(function(){
 					Birdy.jump(); //Jump when the user clicks
-					console.log('Jumping!');
-                    addPipe();
+					//console.log('Jumping!');
 				});
+                
+                $('body').keydown(function(event){
+                    if(event.which == 32){
+                        addPipe();
+                    }
+                });
+                
+                setInterval(function(){checkCollisions();}, 200);
+                
+                //Set so a new pipe gets added every 2500ms (2.5sec)
+                //TODO: Change this so that it gets shorter as score increases.
+                setInterval(function(){addPipe();}, 2500);
                 
                 //Set so the gravity function runs every 50ms.
 				setInterval(function(){Birdy.fall();}, 50);
@@ -74,7 +101,7 @@
                             }
 						}else{
 							gravVeloc = 0; //Reset the falling velocity.
-							console.log('Grav Disabled');
+							//console.log('Grav Disabled');
 						}
 					};
 					
@@ -85,11 +112,45 @@
 							Birdy.fall(); //Run the fall immediately 
 						});
 					};
+                    
+                    this.BirdyObject = selectorObject;
 				});
                 
+                //Generate a new pipe
                 function addPipe(){
-                    $('<div/>').addClass('Pipe').css('height','50px').appendTo(canvasObject);
+                    var PipeGap = 30, //Gap between pipes in %
+                            MinPipeHeight = 5; //Minimum pipe height, so the pipes are still okay sized.
+                    
+                    var MaxTopPipeHeight = 100-PipeGap-2*MinPipeHeight; //Max height the top pipe can be                    
+                    var TopPipeHeight = Math.random()*MaxTopPipeHeight+MinPipeHeight; //Actual top pipe height, which is random.
+                    var BottomPipeTop = TopPipeHeight+PipeGap; //This calculates where the bottom pipe would be in position
+                    var BottomPipeHeight = 100-BottomPipeTop; //This calculates how tall the bottom pipe should be
+                    
+                    //Let's create the top pipe, give it the correct height, and add it to the canvas
+                    $('<div/>').addClass('Pipe').css('height',TopPipeHeight+'%').appendTo(canvasObject); 
+                    //And now the bottom pipe, but this time we need to tell how far from the top it is, and how tall it is as well.            
+                    $('<div/>').addClass('Pipe BottomPipe').css({height:BottomPipeHeight+'%',top: BottomPipeTop+'%'}).appendTo(canvasObject); 
+                    
                 }
+                
+                function checkCollisions(){
+                    $('.Pipe').each(function(){
+                        if(isIntersecting(Birdy.BirdyObject, $(this))){
+                            console.log('Hit!');
+                        }
+                    });
+                }
+                
+                function isIntersecting(obj1, obj2){
+                    var obj1Dimensions = [obj1.offset().left, obj1.offset().top, obj1.offset().left+obj1.width(), obj1.offset().top+obj1.height()];
+                    var obj2Dimensions = [obj2.offset().left, obj2.offset().top, obj2.offset().left+obj2.width(), obj2.offset().top+obj2.height()];
+                    
+                    return !(obj1Dimensions[3] < obj2Dimensions[1] 
+                            || obj1Dimensions[1] > obj2Dimensions[3] 
+                            || obj1Dimensions[0] > obj2Dimensions[2] 
+                            || obj1Dimensions[2] < obj2Dimensions[0] );
+                }
+                
 			});
 			
 		</script>
