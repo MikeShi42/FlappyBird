@@ -48,13 +48,19 @@
 					
 					var gravVeloc = 0;
 					
-					var gravAccel = 0.01;
+					var gravAccel = 0.1;
+                    
+                    var terminalVelocity = 3;
 					
 					this.fall = function(){
 						if(!jumping){ //Check if we're jumping
 							//If we're currently not jumping
 							selectorObject.stop().animate({top:'+='+gravVeloc+'%'}, 50, 'linear'); //Stop any current animations and then drop the bird by Velocity%
-							gravVeloc += graveAccel; //Add the acceleration scalar to the velocity scalar.
+							gravVeloc += gravAccel; //Add the acceleration scalar to the velocity scalar.
+                            //Limit the maximum velocity of the bird
+                            if(gravVeloc>terminalVelocity){
+                                gravVeloc = terminalVelocity;
+                            }
 						}else{
 							gravVeloc = 0; //Reset the falling velocity.
 							console.log('Grav Disabled');
@@ -63,7 +69,7 @@
 					
 					this.jump = function(){
 						jumping = true; //Set that we're jumping right now
-						selectorObject.stop().animate({top:'-=9%'}, 500, 'linear', function(){ //stop any current animations and "Jump" up 9% in 500ms linearly.
+						selectorObject.stop().animate({top:'-=9%'}, 100, 'linear', function(){ //stop any current animations and "Jump" up 9% in 100ms linearly.
 							jumping = false; //Set our jumping flag to false right after our jump
 							Birdy.fall(); //Run the fall immediately 
 						});
