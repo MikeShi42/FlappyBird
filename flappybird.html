@@ -20,6 +20,10 @@
 				top: 50%;
 				left: 20%;
 			}
+            .Pipe{
+                width: 150px;
+                background: greenyellow;
+            }
 		</style>
 		
 	</head>
@@ -36,11 +40,18 @@
 		
 		
 			$(function(){
-				$('#Canvas').mousedown(function(){
-					Birdy.jump();
+                
+                var canvasObject = $('#Canvas');
+                
+				canvasObject.mousedown(function(){
+					Birdy.jump(); //Jump when the user clicks
 					console.log('Jumping!');
+                    addPipe();
 				});
+                
+                //Set so the gravity function runs every 50ms.
 				setInterval(function(){Birdy.fall();}, 50);
+                                
 				var Birdy = new (function(){
 					var selectorObject = $('#Birdy');
 					
@@ -75,6 +86,10 @@
 						});
 					};
 				});
+                
+                function addPipe(){
+                    $('<div/>').addClass('Pipe').css('height','50px').appendTo(canvasObject);
+                }
 			});
 			
 		</script>
