@@ -14,14 +14,15 @@
 				background: steelblue;
 			}
 			#Birdy{
-				width: 100px;
-				height: 100px;
+				width: 75px;
+				height: 15%;
 				background: red;
 				
 				position:absolute;
 				top: 50%;
 				left: 20%;
 			}
+
             .Pipe{
                 position:absolute;
                 top: 0;
@@ -43,11 +44,22 @@
                 from {left: 100%}
                 to {left: -25%}
             }
+            
+            
+            
+            #DebugInfo{
+                position: absolute;
+                top: 0; left: 0;
+                width: 150px;
+                height: 250px;
+                z-index: 25;
+            }
 		</style>
 		
 	</head>
 	<body>
 		<div id="Canvas">
+            <div id="DebugInfo"></div>
 			<div id="Birdy">
 			</div>
 		</div>
@@ -58,6 +70,8 @@
 			$(function(){
                 
                 var canvasObject = $('#Canvas');
+                
+                var CurrentScore = 0;
                                 
 				canvasObject.mousedown(function(){
 					Birdy.jump(); //Jump when the user clicks
@@ -71,6 +85,8 @@
                 });
                 
                 setInterval(function(){checkCollisions();}, 200);
+                
+                setInterval(function(){incrementScore();}, 200);
                 
                 //Set so a new pipe gets added every 2500ms (2.5sec)
                 //TODO: Change this so that it gets shorter as score increases.
@@ -86,9 +102,9 @@
 					
 					var gravVeloc = 0;
 					
-					var gravAccel = 0.1;
+					var gravAccel = 0.25;
                     
-                    var terminalVelocity = 3;
+                    var terminalVelocity = 5;
 					
 					this.fall = function(){
 						if(!jumping){ //Check if we're jumping
@@ -99,6 +115,7 @@
                             if(gravVeloc>terminalVelocity){
                                 gravVeloc = terminalVelocity;
                             }
+                            $('#DebugInfo').html('Gravity: '+gravVeloc);
 						}else{
 							gravVeloc = 0; //Reset the falling velocity.
 							//console.log('Grav Disabled');
@@ -126,10 +143,10 @@
                     var BottomPipeTop = TopPipeHeight+PipeGap; //This calculates where the bottom pipe would be in position
                     var BottomPipeHeight = 100-BottomPipeTop; //This calculates how tall the bottom pipe should be
                     
-                    //Let's create the top pipe, give it the correct height, and add it to the canvas
-                    $('<div/>').addClass('Pipe').css('height',TopPipeHeight+'%').appendTo(canvasObject); 
-                    //And now the bottom pipe, but this time we need to tell how far from the top it is, and how tall it is as well.            
-                    $('<div/>').addClass('Pipe BottomPipe').css({height:BottomPipeHeight+'%',top: BottomPipeTop+'%'}).appendTo(canvasObject); 
+                    //Let's create the top pipe, give it the correct height, and add it to the canvas. Mark them as non-scored.  
+                    $('<div/>').addClass('Pipe').css('height',TopPipeHeight+'%').data('scored', false).appendTo(canvasObject); 
+                    //And now the bottom pipe, but this time we need to tell how far from the top it is, and how tall it is as well. Mark them as non-scored.           
+                    $('<div/>').addClass('Pipe BottomPipe').css({height:BottomPipeHeight+'%',top: BottomPipeTop+'%'}).data('scored', false).appendTo(canvasObject); 
                     
                 }
                 
@@ -149,6 +166,20 @@
                             || obj1Dimensions[1] > obj2Dimensions[3] 
                             || obj1Dimensions[0] > obj2Dimensions[2] 
                             || obj1Dimensions[2] < obj2Dimensions[0] );
+                }
+                
+                function incrementScore(){
+                    
+                    $('.BottomPipe').each(function(){
+                        var BirdyBeakXPos = Birdy.BirdyObject.offset().left + Birdy.BirdyObject.width(); //Calculate the X coordinate of the bird's beak.
+                        var PipeRightXPos = $(this).offset().left + $(this).width(); //Calculate the X coordinate of the pipe's right edge.
+                        if(!$(this).data('scored') && BirdyBeakXPos>PipeRightXPos){
+                            CurrentScore++;
+                            console.log(CurrentScore);
+                            $(this).data('scored', true);
+                        }
+                    });
+                    
                 }
                 
 			});
