@@ -142,7 +142,28 @@
                     -2px 2px 0 #000,
                     2px 2px 0 #000;
                 
-                z-index: 50; /* Pop the box above the pipes */
+                z-index: 150; /* Pop the box above the pipes */
+             }
+             
+             #CurrentScoreCard{
+                 /* Position the score box so it's perfectly centered on screen */
+                position: relative; /* Position relative inside the absolute container */
+                left: -50%; /* Move it so half of it is left of the center */
+                margin-top: -700%; /* Raise it so that it's above center */
+                                
+                text-align: center; /* Horiziontally center the text */
+                
+                font-family: flappybird; /* Use the flappybird font for the score */
+                font-size: 4vw; /* Scale the font to 2% of viewport */
+                
+                color:white; /* White font */                
+                text-shadow: /* Give it a 2px of "text shadow" to act as an outline to the score text */
+                    -2px -2px 0 #000,  
+                    2px -2px 0 #000,
+                    -2px 2px 0 #000,
+                    2px 2px 0 #000;
+                
+                z-index: 50; /* Raise above the pipes */
              }
             
             
@@ -173,7 +194,12 @@
                     "P" to Pause
                 </div>
             </div>
-            
+                        
+            <div style="position: absolute; left: 50%; top: 50%;">
+                <div id="CurrentScoreCard" class="noSelect">
+                    <span id="CurrentScore">0</span>
+                </div>
+            </div>
             
             <div style="position: absolute; left: 50%; top: 50%;">
                 <div id="LostScoreScreen" class="noSelect">
@@ -277,7 +303,6 @@
 				});
                 
                 $('body').keydown(function(event){
-                    //TODO: Remove this as this is for debugging, swap to jump
                     if(event.which == 32){
                         resetGame();
                     }
@@ -291,14 +316,18 @@
                 
                 function gameLoop(){
                     
-                    incrementScore();
-                    checkCollisions();
+                    if(gameLoopCounter % 2 === 0){ //Reduce to every 2 loops to improve performance
+                        incrementScore();
+                        checkCollisions();
+                    }
+                    
                     isInBound(Birdy.BirdyObject, canvasObject);
                     Birdy.fall();
                     
                     //TODO: Add decrease time between pipes as score increases
                     if(gameLoopCounter%90 === 0){
                         addPipe(); //Add a pipe every 90 loops ~2.7 seconds
+                        cleanPipes(); //Remove pipes as well
                     }
                     
                     if(gameLoopCounter%7 === 0){ //Flap the wings every 7 loops
@@ -402,6 +431,16 @@
                     
                 }
                 
+                //Delete all the pipes that are already off screen
+                function cleanPipes(){
+                    $('.Pipe').each(function(){
+                        //If the position percentage is less than -20%, it's off the screen
+                        if($(this).offset().left/$(this).parent().width() < -0.2){ 
+                            $(this).remove();
+                        }
+                    });
+                }
+                
                 function checkCollisions(){
                     $('.Pipe').each(function(){
                         if(isIntersecting(Birdy.BirdyObject, $(this))){
@@ -448,7 +487,8 @@
                             console.log(CurrentScore); //Write to console the score we currently have for debugging purposes
                             $(this).data('scored', true); //Mark the pipe as scored, so we won't look at it again
                         }
-                    });                    
+                    });          
+                    $('#CurrentScore').html(CurrentScore); //Update current score display
                 }
                                
                                 
