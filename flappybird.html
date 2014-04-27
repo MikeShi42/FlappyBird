@@ -231,9 +231,14 @@
                 
                 function endGame(){
                     Lost = true; //Set the lost flag to true, so they can't unpause;
-                    pauseGame(); //"Pause" the game
+                    pauseGame(); //"Pause" the game              
+                    var cookieScore = getCookie('HighScore');      
+                    console.log(Math.max(CurrentScore,cookieScore));
+                    console.log(cookieScore);
+                    setCookie('HighScore', Math.max(CurrentScore,cookieScore), 30000); //Store the highest score between current score and saved score
                     Birdy.BirdyObject.animate({top:'90%'}, 1500, 'linear'); //Drop our birdy
                     $('#FinalScore').html(CurrentScore); //Update the current score
+                    $('#BestScore').html(Math.max(CurrentScore,cookieScore)); //Update the current score
                     $('#LostScoreScreen').slideDown(); //Have a nice slideDown for the score screen
                 }
                 
@@ -328,7 +333,7 @@
                         gravVeloc = 0;
                         Angle = 0;
                         WingPosition = 0;
-                        selectorObject.rotate(0).css('top','50%');
+                        selectorObject.stop().rotate(0).css('top','50%');
                     }
                     
 					this.fall = function(){
@@ -458,12 +463,24 @@
                                  'transform' : 'rotate('+ degrees +'deg)'});
                 };
                 
+                /* Set and Get Cookies function from: http://www.w3schools.com/js/js_cookies.asp */
                 function setCookie(cname,cvalue,exdays)
                 {
                     var d = new Date();
                     d.setTime(d.getTime()+(exdays*24*60*60*1000));
                     var expires = "expires="+d.toGMTString();
                     document.cookie = cname + "=" + cvalue + "; " + expires;
+                }
+                function getCookie(cname)
+                {
+                    var name = cname + "=";
+                    var ca = document.cookie.split(';');
+                    for(var i=0; i<ca.length; i++) 
+                    {
+                        var c = ca[i].trim();
+                        if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+                    }
+                    return "";
                 }
 			});
 			
